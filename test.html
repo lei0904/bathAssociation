@@ -1,0 +1,393 @@
+<template>
+  <div id="select_address">
+    <Header :show="'slot'" @input="input" v-model="search">
+      <div class="search-wrapper">
+        <div class="search-select" @click="openDistPicker">{{addressArea}}</div>
+        <div class="search-input">
+          <input class="search-input-core" id="searchInput" placeholder="请输入您的收货地址" @focus="active = true" v-model="searchText">
+          <i class="search-input-clear" v-show="searchText && active" @click="searchText=''"></i>
+        </div>
+      </div>
+    </Header>
+    <div class="container" v-show="!searching">
+      <div id="map" class="select_address_map">
+      </div>
+      <div class="select_address_list">
+        <section class="item" v-for="(item, index) in list1" :class="index == 0 ? 'cur' : ''">
+          <div class="wrapper">
+            <div class="title"><span v-if="index == 0">[当前位置]</span>{{item.title}}</div>
+            <div class="info">{{item.address}}</div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="container" style="z-index: 100; background: #fff" v-show="searching">
+      <div class="select_address_list">
+        <section class="item" v-for="(item, index) in list2">
+          <div class="wrapper">
+            <div class="title">{{item.title}}</div>
+            <div class="info">{{item.address}}</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <DistPicker ref="distPicker"
+                :defaultAddressProvince="addressProvince"
+                :defaultAddressCity="addressCity"
+                :defaultAddressArea="addressArea"
+                @confirm="addressSelected"></DistPicker>
+  </div>
+</template>
+<script>
+  import BM from '../../bm.js'
+  import DistPicker from '../Picker/DistPicker/index.vue'
+
+  export default {
+    name: 'SelectAddress',
+    data () {
+      return {
+        map: null,
+        geolocation: null,
+
+        list1: [],
+        list2: [],
+
+        search: '上海市',
+        active: false,
+        searchText: '',
+
+        metaContent: '',
+
+        addressProvince: '上海市',
+        addressCity: '市辖区',
+        addressArea: '黄浦区',
+
+        show: false
+      }
+    },
+    components: {
+      DistPicker
+    },
+    computed: {
+      searching () {
+        return this.searchText && this.active;
+      }
+    },
+    mounted () {
+      let _this = this;
+      BM('Ewcp0cprIYM0hOD10HjUeBASgQ0ux7c6').then((BMap) => {
+        _this.BMap = BMap;
+        _this.mapInit(BMap);
+      });
+    },
+    methods: {
+      address: function () {
+        return this.addressProvince + this.addressCity + this.addressArea
+      },
+      initAutocomplete (BMap, location) {
+        let  _this = this;
+        if (_this.ac) {
+          _this.ac.dispose();
+          _this.ac = null;
+        }
+
+        let ac = new BMap.Autocomplete({
+          "input" : "searchInput",
+          types: 'city',
+          location: location,
+          onSearchComplete: function () {
+            console.log(arguments)
+          }
+        });
+        ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+          console.log('onhighlight', e)
+        });
+        ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+          console.log('onconfirm', e)
+        });
+        _this.ac = ac;
+      },
+      mapReInit(BMap, center) {
+        this.map = null;
+        let _this = this;
+        let map = new BMap.Map("map");
+        map.centerAndZoom(center, 15);
+        map.setMapStyle({style:'grayscale'});
+
+        map.addControl(new BMap.NavigationControl());
+        map.addControl(new BMap.ScaleControl());
+        map.addControl(new BMap.OverviewMapControl());
+
+        map.addEventListener("click", function (e) {
+          map.clearOverlays();
+          let marker = new BMap.Marker(new BMap.Point(e.point.lng, e.point.lat));
+          map.addOverlay(marker);
+          map.panTo(e.point);
+
+          //定位到点击地点
+          let myGeo = new BMap.Geocoder();
+          myGeo.getLocation(e.point, function(result){
+            let arr = [];
+
+            arr.push({
+              title: result.address,
+              address: result.address
+            });
+
+            let surroundingPois = result.surroundingPois;
+            if (surroundingPois) {
+              let item;
+              for (let idx = 0, len = surroundingPois.length; idx < len; idx++) {
+                item = surroundingPois[idx];
+                arr.push({
+                  title: item.title,
+                  address: item.address
+                });
+              }
+            }
+
+            _this.list1 = arr;
+            _this.initAutocomplete(BMap, _this.map);
+          });
+        });
+
+        this.map = map;
+        this.initAutocomplete(BMap, map)
+      },
+      mapInit (BMap) {
+        let _this = this;
+        let map = new BMap.Map("map");
+        let point = new BMap.Point(116.331398,39.897445);
+        map.centerAndZoom(point, 15);
+        map.setMapStyle({style:'grayscale'});
+
+        map.addControl(new BMap.NavigationControl());
+        map.addControl(new BMap.ScaleControl());
+        map.addControl(new BMap.OverviewMapControl());
+
+        //定位到当前所在地
+        let geolocation = new BMap.Geolocation();
+        geolocation.enableSDKLocation();
+        geolocation.getCurrentPosition(function(r){
+          if(this.getStatus() === BMAP_STATUS_SUCCESS){
+            let mk = new BMap.Marker(r.point);
+            map.addOverlay(mk);
+            map.panTo(r.point);
+
+            _this.show = true;
+
+            _this.addressProvince = r.address.province;
+            _this.addressCity = r.address.city;
+            _this.addressArea = r.address.city;
+
+            let myGeo = new BMap.Geocoder();        //创建地址解析实例
+            myGeo.getLocation(r.point, function(result){
+              let arr = [];
+
+              arr.push({
+                title: result.address,
+                address: result.address
+              });
+
+              let surroundingPois = result.surroundingPois;
+              if (surroundingPois) {
+                let item;
+                for (let idx = 0, len = surroundingPois.length; idx < len; idx++) {
+                  item = surroundingPois[idx];
+                  arr.push({
+                    title: item.title,
+                    address: item.address
+                  });
+                }
+              }
+
+              _this.list1 = arr;
+              _this.initAutocomplete(BMap, map);
+            });
+          } else {
+            console.log('failed: ' + this.getStatus());
+          }
+        });
+
+        map.addEventListener("click", function (e) {
+          map.clearOverlays();
+          let marker = new BMap.Marker(new BMap.Point(e.point.lng, e.point.lat));
+          map.addOverlay(marker);
+          map.panTo(e.point);
+
+          //定位到点击地点
+          let myGeo = new BMap.Geocoder();
+          myGeo.getLocation(e.point, function(result){
+            let arr = [];
+
+            arr.push({
+              title: result.address,
+              address: result.address
+            });
+
+            let surroundingPois = result.surroundingPois;
+            if (surroundingPois) {
+              let item;
+              for (let idx = 0, len = surroundingPois.length; idx < len; idx++) {
+                item = surroundingPois[idx];
+                arr.push({
+                  title: item.title,
+                  address: item.address
+                });
+              }
+            }
+
+            _this.list1 = arr;
+            _this.initAutocomplete(BMap, _this.map);
+          });
+        });
+
+        this.map = map;
+        this.geolocation = geolocation;
+      },
+
+      input () {
+        console.info(this.search)
+      },
+      openDistPicker() {
+        this.$refs['distPicker'].open()
+      },
+      addressSelected (addressProvince, addressCity, addressArea) {
+        this.addressProvince = addressProvince
+        this.addressCity = addressCity
+        this.addressArea = addressArea
+        // this.map.centerAndZoom(, 15);
+        this.mapReInit(this.BMap, addressProvince + addressCity + addressArea);
+        //console.log(addressProvince + addressCity + addressArea)
+        this.list1 = [];
+      }
+    }
+  }
+</script>
+<style lang="scss">
+  .tangram-suggestion-main {
+    z-index: 300;
+  }
+  .search-wrapper {
+    height: 66px;
+    line-height: 66px;
+    position: absolute;
+    left: 84px;
+    top: 12px;
+    right: 34px;
+    background: #efefef;
+    border-radius: 5px;
+  }
+  .search-wrapper .search-select {
+    height: 100%;
+    font-size: 28px; /*px*/
+    padding-right: 31px;
+    color: #313131;
+    top: 0;
+    box-sizing: border-box;
+    display: inline-block;
+    float: left;
+    margin-left: 30px;
+    background: url("../../../static/image/bottom_arrow.png");
+    background-size: 18px 11px;
+    background-repeat: no-repeat;
+    background-position: center right;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+  .search-wrapper .search-input {
+    /*height: 30px;*/
+    position: absolute;
+    left: 165px;
+    right: 0px;
+    top: 0;
+    bottom: 0;
+    /*border-left: 1px solid #aaaaaa; !*no*!*/
+  }
+  .search-wrapper .search-input:before {
+    content: ' ';
+    display: inline-block;
+    width: 1px; /*no*/
+    background: #aaaaaa;
+    height: 30px;
+    position: absolute;
+    top: 20px;
+    left: 1px;
+  }
+  .search-wrapper .search-input .search-input-core {
+    outline: none;
+    -webkit-appearance: normal;
+    float: left;
+    width: 100%;
+    height: 100%;
+    font-size: 28px; /*px*/
+    color: #313131;
+    border: none;
+    background: none;
+    padding: 0 22px;
+    box-sizing: border-box;
+  }
+  .search-wrapper .search-input .search-input-clear {
+    width: 38px;
+    height: 38px;
+    background: url("../../../static/image/input-clear.png") no-repeat;
+    background-size: 100% 100%;
+    display: inline-block;
+    position: absolute;
+    right: 16px;
+    top: 14px;
+  }
+
+  #select_address .select_address_map {
+    height: 500px;
+    width: 100%;
+  }
+
+  #select_address .select_address_list {
+    background: #ffffff;
+    overflow: auto;
+    position: absolute;
+    top: 500px;
+    bottom: 0px;
+    width: 100%;
+  }
+
+  #select_address .select_address_list .item {
+    height: 150px;
+    width: 100%;
+    padding: 0 34px 0 116px;
+    box-sizing: border-box;
+    border-bottom: 1px solid $border; /*no*/
+    background: url("../../../static/image/pos_icon.png") no-repeat 34px center;
+    background-size: 48px 54px;
+  }
+  #select_address .select_address_list .item.cur {
+    background: url("../../../static/image/pos_icon_cur.png") no-repeat 34px center;
+    background-size: 48px 54px;
+  }
+
+  #select_address .select_address_list .item .wrapper {
+    float: left;
+    width: 100%;
+    margin-top: 30px;
+  }
+  #select_address .select_address_list .item .wrapper .title,
+  #select_address .select_address_list .item .wrapper .info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #select_address .select_address_list .item .wrapper .title {
+    font-size: 32px; /*px*/
+    color: #313131;
+    padding-bottom: 14px;
+  }
+  #select_address .select_address_list .item .wrapper .info {
+    font-size: 26px; /*px*/
+    color: #898989;
+    padding-top: 14px;
+  }
+</style>

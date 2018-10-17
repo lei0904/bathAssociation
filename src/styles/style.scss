@@ -1,0 +1,344 @@
+@import "import";
+.checkbox-label {
+  position: relative;
+}
+.checkbox-label .checkbox-core{
+  display: none;
+}
+.checkbox-label .checkbox-core + .checkbox-view{
+  display: inline-block;
+  width: 34px;
+  height: 34px;
+  background: url("../../static/image/check_off.png") no-repeat center;
+  background-size: 100% 100%;
+}
+.checkbox-label .checkbox-view{
+  display: inline-block;
+  width: 34px;
+  height: 34px;
+  background: url("../../static/image/check_off.png") no-repeat center;
+  background-size: 100% 100%;
+}
+.checkbox-label .checkbox-core:checked + .checkbox-view{
+  background: url("../../static/image/check_on.png") no-repeat center;
+  background-size: 100% 100%;
+}
+
+.checkbox-label .checkbox-view.checked {
+  background: url("../../static/image/check_on.png") no-repeat center;
+  background-size: 100% 100%;
+}
+
+.clearfix:after {
+  content: " ";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.clearfix {
+  display: inline-block;
+}
+
+.pt20 {
+  padding-top: 20px;
+}
+.mt20 {
+  margin-top: 20px;
+}
+
+.mintui {
+  font-size: 32px; /*px*/
+}
+.mint-toast {
+  background: rgba(0, 0, 0, 0.6);
+}
+.with-icon {
+  border-radius: 12px;
+  padding: 21px!important;
+  padding-bottom: 34px!important;
+  padding-top: 34px!important;
+  top: 40%!important;
+  min-width: 250px;
+}
+.with-icon .failed {
+   display: inline-block;
+   width: 100px;
+   height: 100px;
+   background: url("../../static/image/icon-failed.png");
+   background-size: 100%;
+   margin-bottom: 26px;
+   margin-top: 0px;
+ }
+.with-icon .success {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  background: url("../../static/image/type_1.png");
+  background-size: 100%;
+  margin-bottom: 26px;
+  margin-top: 0px;
+}
+
+.mint-toast-text {
+  font-size: 28px; /*px*/
+  color: #ffffff;
+  line-height: 32px;
+}
+
+
+/*~~~~~~~~~~*/
+/*  公共样式  */
+/*~~~~~~~~~~*/
+
+body {
+  background: #efefef;
+  font-weight: normal;
+}
+
+.checkbox {
+  height: $checkboxSize;
+  display: inline-block;
+  line-height: $checkboxSize;
+  position: relative;
+  width: 100%;
+}
+.checkbox .checkbox-input {
+  outline: none;
+  -webkit-appearance: none;
+  background: url("../../static/image/uncheck.png") no-repeat;
+  background-size: 100%;
+  width: $checkboxSize;
+  height: $checkboxSize;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.checkbox .checkbox-input:checked {
+  background: url("../../static/image/checked.png") no-repeat;
+  background-size: 100%;
+}
+.checkbox .checkbox-text {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 10px;
+  color: $checkboxColor;
+  font-size: $checkboxFontSize; /*px*/
+  position: absolute;
+  top: 0;
+  left: 35px;
+  right: 0;
+}
+.checkbox .checkbox-text span {
+  color: $checkboxRedColor;
+}
+
+.pwd {
+  display: block;
+  width: 72px;
+  height: 32px;
+}
+.pwd.off{
+  background: url("../../static/image/password-unshow.png") no-repeat center right;
+  background-size: 40px 26px;
+}
+.pwd.on{
+  background: url("../../static/image/password-show.png") no-repeat center right;
+  background-size: 40px 26px;
+}
+
+#app .mint-field-core {
+  color: $inputColor;
+  font-size: $inputFontSize; /*px*/
+}
+
+.mint-actionsheet-listitem,
+.mint-actionsheet-button {
+  height: 90px;
+  line-height: 90px;
+  font-size: 32px; /*px*/
+  text-align: center;
+}
+
+/* 边框 */
+#app .mint-cell-wrapper {
+  background-origin: border-box;
+  padding: 34px 32px;
+  font-size: $inputFontSize; /*px*/
+  //font-weight: 300;
+  background-image: none;
+}
+#app .mint-cell {
+  min-height: 78px;
+  border: 1px solid $border;  /*no*/
+  border-bottom: none;
+}
+#app .mint-cell:last-child {
+  border-bottom: 1px solid $border;  /*no*/
+  background-image: none;
+}
+
+#app .no_border .mint-cell {
+  min-height: 120px;
+  border-left: none;
+  border-right: none;
+}
+#app .no_border .mint-cell:first-of-type {
+  border-top: none;
+}
+#app .no_border .mint-cell .mint-cell-wrapper {
+  padding: 0;
+}
+#app .no_border .mint-cell:first-child .mint-cell-wrapper {
+  background-image: none;
+}
+#app .no_border .mint-cell .mint-cell-wrapper .mint-button--default{
+  height: 60px;
+  font-size: 30px;
+  color: #ffffff;
+}
+/* 边框 */
+
+#app .mint-cell-title {
+  width: 150px;
+  margin-right: 54px;
+}
+
+
+#app .mint-button--default {
+  background: $btnBgColor;
+  box-shadow: 0 0 1px $btnBgColor; /*px*/
+  border-radius: 3px; /*no*/
+}
+#app .mint-button--primary {
+  background: #aaaaaa;
+  box-shadow: 0 0 1px #aaaaaa; /*px*/
+  border-radius: 3px; /*no*/
+}
+
+
+
+#app .mint-popup-bottom {
+  width: 100%;
+}
+
+
+#app .container {
+  overflow: hidden;
+  position: absolute;
+  top: $headerPx;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+}
+#app .container.overflow {
+  overflow: auto;
+  -webkit-overflow-scrolling:touch;
+}
+#app .no-header {
+  top: 0;
+}
+#app .has-footer {
+  bottom: $footerPx;
+}
+#app .container.bg {
+  background: #efefef;
+}
+
+#app .num {
+  background: #ff0000;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 18px; /*px*/
+  position: absolute;
+  text-align: center;
+  border-radius: 50%;
+  color: #ffffff;
+  top: 15px;
+  right: 35px;
+}
+#app .mint-tabbar.is-fixed {
+  z-index: 200;
+}
+
+
+
+.select-group,
+.address-select {
+  width: 100%;
+}
+.select-group .select-item {
+  float: right;
+  text-align: center;
+  border: 1px solid $border; /*no*/
+  box-sizing: border-box;
+  border-radius: 50px;
+  margin-right: 25px;
+  width: 220px;
+  height: 60px;
+  line-height: 60px;
+  padding-left: 0;
+  padding-right: 0;
+  font-size: 26px;
+  color: #626262;
+}
+.select-group .select-item.selected {
+  border-color: #3eb049;
+  color: #3eb049;
+}
+.address-select .address-select-item {
+  color: #434343;
+  font-size: 30px; /*px*/
+}
+.address-select .address-select-item {
+  /*float: left;*/
+  display: inline-block;
+}
+.address-select .address-select-item .placeholder {
+  color: #959595;
+}
+.address-select .address-select-arrow {
+  float: right;
+  background: url("../../static/image/arrow-right.png");
+  background-size: 100% 100%;
+  display: inline-block;
+  width: 22px;
+  height: 34px;
+}
+#app .v-modal{
+  opacity: 0.2;
+}
+.v-modal{
+  opacity: 0.4;
+}
+
+
+.badge.group2 {
+  position: absolute;
+  width: 183px;
+  height: 183px;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+.badge.group2.mrms {
+  background: url("../../static/image/badge/group2/mrms.png") no-repeat;
+  background-size: 100% 100%;
+}
+.badge.group1 {
+  position: absolute;
+  display: inline-block;
+  width: 81px;
+  height: 81px;
+}
+.badge.group1.ms-hh {
+  background: url("../../static/image/badge/group1/ms-hh.png") no-repeat;
+  background-size: 100% 100%;
+}
+.badge.group1.ms-mrms {
+  background: url("../../static/image/badge/group1/ms-mrms.png") no-repeat;
+  background-size: 100% 100%;
+}
